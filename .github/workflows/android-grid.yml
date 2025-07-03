@@ -12,16 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Start Docker services
+      - name: Start containers
         run: docker compose up --build -d --wait --wait-timeout 60
-
-      - name: Wait for Appium readiness
-        run: |
-          echo "🔁 Waiting for Appium to be ready on /wd/hub/status..."
-          timeout 60s bash -c \
-            "until curl -s http://localhost:4723/wd/hub/status | grep -q 'build'; do \
-              echo -n .; sleep 5; \
-            done"
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -36,7 +28,7 @@ jobs:
           pytest -v tests/ | tee pytest.log
         continue-on-error: true
 
-      - name: Save container logs
+      - name: Collect container logs
         if: always()
         run: |
           docker logs selenium-hub > hub.log || true

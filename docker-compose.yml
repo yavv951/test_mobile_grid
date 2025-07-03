@@ -21,8 +21,8 @@ services:
     image: selenium/node-docker:4.21.0
     container_name: node
     depends_on:
-      - appium
       - selenium-hub
+      - appium
     volumes:
       - ./docker/node1.toml:/opt/selenium/config.toml
     command: >
