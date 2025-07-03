@@ -42,8 +42,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-results
-          path: |
-            pytest.log
-            hub.log
-            appium.log
-            '*.png'
+          path: pytest.log appium.log hub.log *.png
+
