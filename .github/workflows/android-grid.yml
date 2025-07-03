@@ -2,7 +2,7 @@ name: Android Appium Grid Tests
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -12,9 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Stand up containers (Grid + Appium + Node)
+      - name: Start services with Docker Compose
         run: |
           docker compose up --build -d
+          # Ждём, пока контейнеры полностью стартуют
           sleep 20
 
       - name: Set up Python
@@ -26,22 +27,23 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: pytest -v tests/ | tee pytest.log
+        run: |
+          pytest -v tests/ | tee pytest.log
         continue-on-error: true
 
-      - name: Save logs
+      - name: Collect container logs
         if: always()
         run: |
           docker logs selenium-hub > hub.log || true
           docker logs appium > appium.log || true
 
-      - name: Upload artifacts
+      - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: test-results
-          path:
-            - pytest.log
-            - appium.log
-            - hub.log
-            - "*.png"
+          path: |
+            pytest.log
+            hub.log
+            appium.log
+            '*.png'
