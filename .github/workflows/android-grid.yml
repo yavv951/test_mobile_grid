@@ -9,36 +9,13 @@ jobs:
   test-android:
     runs-on: ubuntu-latest
 
-    services:
-      selenium-hub:
-        image: selenium/hub:4.21.0
-        ports: ["4444:4444"]
-      appium:
-        image: appium/appium:latest
-        ports: ["4723:4723"]
-        volumes:
-          - ./:/workspace
-        options: >-
-          --entrypoint ""
-        command: bash /workspace/docker/entrypoint.sh
-      node:
-        image: selenium/node-docker:4.21.0
-        depends_on:
-          - selenium-hub
-          - appium
-        volumes:
-          - ./:/workspace
-        options: >-
-          --entrypoint ""
-        command: >
-          java -jar /opt/selenium/selenium-server.jar node --config /workspace/docker/node1.toml
-
     steps:
       - uses: actions/checkout@v3
 
-      - name: Wait for services to be ready
+      - name: Stand up containers (Grid + Appium + Node)
         run: |
-          sleep 15  # подождать загрузки контейнеров
+          docker compose up --build -d
+          sleep 20
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -52,11 +29,11 @@ jobs:
         run: pytest -v tests/ | tee pytest.log
         continue-on-error: true
 
-      - name: Save container logs
+      - name: Save logs
         if: always()
         run: |
-          docker logs appium > appium.log || true
           docker logs selenium-hub > hub.log || true
+          docker logs appium > appium.log || true
 
       - name: Upload artifacts
         if: always()
