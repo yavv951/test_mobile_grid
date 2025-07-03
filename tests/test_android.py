@@ -1,15 +1,27 @@
-import pytest
 from appium import webdriver
+from appium.options.common import AppiumOptions
 
 def test_android_via_grid():
-    caps = {
-      "platformName": "Android",
-      "appium:automationName": "UiAutomator2",
-      "appium:deviceName": "Android Emulator",
-      "platformVersion": "11.0",
-      "appium:app": "/apps/ru.oneme.app.apk"
+    # Словарь с настройками
+    capabilities = {
+        "platformName": "Android",
+        "appium:automationName": "UiAutomator2",
+        "deviceName": "Android Emulator",
+        "platformVersion": "11.0",
+        "appium:app": "/apps/ru.oneme.app.apk"
     }
 
-    driver = webdriver.Remote("http://localhost:4444/wd/hub", caps)
-    assert driver.is_app_installed("ru.oneme.app")  # замени под своё
+    # Преобразуем в options (обязательно для последних версий)
+    options = AppiumOptions().load_capabilities(capabilities)
+
+    # Подключение к Selenium Grid + Appium Relay
+    driver = webdriver.Remote(
+        command_executor="http://localhost:4444/wd/hub",
+        options=options
+    )
+
+    # Проверка установки приложения
+    assert driver.is_app_installed("ru.oneme.app")
+
+    # Завершаем сессию
     driver.quit()
