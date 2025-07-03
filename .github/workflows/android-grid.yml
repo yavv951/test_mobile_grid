@@ -12,11 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Start services with Docker Compose
-        run: |
-          docker compose up --build -d
-          # Ждём, пока контейнеры полностью стартуют
-          sleep 20
+      - name: Start Docker Compose services
+        run: docker compose up --build -d --wait --wait-timeout 60
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -31,17 +28,15 @@ jobs:
           pytest -v tests/ | tee pytest.log
         continue-on-error: true
 
-      - name: Collect container logs
+      - name: Save container logs
         if: always()
         run: |
           docker logs selenium-hub > hub.log || true
           docker logs appium > appium.log || true
 
-      - name: Upload test artifacts
+      - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: pytest.log appium.log hub.log *.png
-          include-hidden-files: true
-
