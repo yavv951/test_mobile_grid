@@ -7,29 +7,22 @@ services:
       - "4444:4444"
 
   appium:
-    image: appium/appium:latest
+    build:
+      context: ./docker/appium
     container_name: appium
     volumes:
       - ./apps:/apps
-      - ./docker/appium1.yml:/config/appium1.yml
-      - ./docker/entrypoint.sh:/entrypoint.sh
     ports:
       - "4723:4723"
-    entrypoint: ["/bin/bash", "/entrypoint.sh"]
-    privileged: true
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:4723/status || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+    depends_on:
+      - selenium-hub
 
   node:
     image: selenium/node-docker:4.21.0
     container_name: node
     depends_on:
-      appium:
-        condition: service_healthy
+      - appium
+      - selenium-hub
     volumes:
       - ./docker/node1.toml:/opt/selenium/config.toml
     command: >
