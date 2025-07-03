@@ -1,0 +1,8 @@
+server:
+  port: 4723
+  use-drivers:
+    - uiautomator2
+  default-capabilities:
+    wdaLocalPort: 8101
+    mjpegServerPort: 9101
+    mjpegScreenshotUrl: "http://localhost:9101"
