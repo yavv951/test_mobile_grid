@@ -17,13 +17,19 @@ services:
       - "4723:4723"
     entrypoint: ["/bin/bash", "/entrypoint.sh"]
     privileged: true
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4723/status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   node:
     image: selenium/node-docker:4.21.0
     container_name: node
     depends_on:
-      - selenium-hub
-      - appium
+      appium:
+        condition: service_healthy
     volumes:
       - ./docker/node1.toml:/opt/selenium/config.toml
     command: >
