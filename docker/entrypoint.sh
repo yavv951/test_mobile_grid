@@ -1,14 +1,13 @@
 #!/bin/bash
 set -e
 
-# Обработка xapk в папке /apps
-for x in /apps/*.xapk; do
-  if [ -f "$x" ]; then
-    unzip -o "$x" -d /apps/xapk_extracted
-    find /apps/xapk_extracted -name '*.apk' -exec mv {} /apps/ \;
-    find /apps/xapk_extracted -path '*/obb/*' -exec cp -r --parents {} /sdcard/Android/ \;
-  fi
-done
+# Извлечение APK из XAPK (если есть)
+if [ -f /apps/ru.oneme.app.xapk ]; then
+  echo "📦 Extracting XAPK..."
+  mkdir -p /apps/extracted
+  unzip -o /apps/ru.oneme.app.xapk -d /apps/extracted
+  cp /apps/extracted/ru.oneme.app.apk /apps/
+fi
 
-# Запуск Appium
-exec appium --config /config/appium1.yml
+echo "🚀 Starting Appium with base-path /wd/hub..."
+exec appium --config /config/appium1.yml --base-path /wd/hub

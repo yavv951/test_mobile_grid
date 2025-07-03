@@ -2,7 +2,7 @@ name: Android Appium Grid Tests
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -17,9 +17,9 @@ jobs:
 
       - name: Wait for Appium readiness
         run: |
-          echo "🔁 Waiting for Appium to be ready..."
+          echo "🔁 Waiting for Appium to be ready on /wd/hub/status..."
           timeout 60s bash -c \
-            "until curl -s http://localhost:4723/wd/hub/status; do \
+            "until curl -s http://localhost:4723/wd/hub/status | grep -q 'build'; do \
               echo -n .; sleep 5; \
             done"
 
