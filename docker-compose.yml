@@ -1,24 +1,21 @@
 version: '3.8'
 
-services:
-  android_emulator:
-    image: budtmo/docker-android-x86-11.0
-    container_name: android_emulator
-    privileged: true
-    ports:
-      - "6080:6080"
-      - "4723:4723"
-      - "5554:5554"
-      - "5555:5555"
-    environment:
-      - DEVICE=Samsung Galaxy S10
-      - APPIUM=true
-      - AUTO_RECORD=false
-      - VERBOSE=true
-    healthcheck:
-      test: curl --fail http://localhost:4723/wd/hub/status || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 15
+android_emulator:
+  image: budtmo/docker-android-x86-11.0-google_apis
+  privileged: true
+  environment:
+    - DEVICE=Samsung Galaxy S10
+    - APPIUM=true
+    - AUTO_RECORD=false
+  ports:
+    - "4723:4723"
+    - "6080:6080" # VNC
+    - "5554:5554"
+    - "5555:5555"
+  healthcheck:
+    test: curl -f http://localhost:4723/wd/hub/status || exit 1
+    interval: 15s
+    timeout: 10s
+    retries: 10
     volumes:
       - ./apps:/apps
