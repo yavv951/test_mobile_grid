@@ -1,11 +1,18 @@
-FROM node:18
+FROM appium/appium:latest
 
-RUN npm install -g appium@2.1.3 appium-doctor \
-    && appium driver install uiautomator2
+USER root
 
-WORKDIR /app
+ENV ANDROID_HOME=/opt/android-sdk
+ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/emulator
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Установка зависимостей и SDK
+RUN apt-get update && apt-get install -y openjdk-11-jdk unzip curl \
+ && mkdir -p ${ANDROID_HOME}/cmdline-tools \
+ && curl -o sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip \
+ && unzip sdk.zip -d ${ANDROID_HOME}/cmdline-tools \
+ && mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest \
+ && yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses \
+ && ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \"platform-tools\" \"platforms;android-30\" \"emulator\" \"system-images;android-30;google_apis;x86_64\"
 
-ENTRYPOINT ["/entrypoint.sh"]
+USER node
+CMD [\"appium\", \"--base-path\", \"/wd/hub\"]
