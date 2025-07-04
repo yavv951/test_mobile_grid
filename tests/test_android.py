@@ -8,7 +8,7 @@ def test_android_via_grid():
         "appium:automationName": "UiAutomator2",
         "deviceName": "Android Emulator",
         "platformVersion": "11.0",
-        "appium:app": "/apps/ru.oneme.app.apk"
+        "appium:app": "/apps/test_app.apk"
     }
 
     # Преобразуем в options (обязательно для последних версий)
@@ -21,7 +21,7 @@ def test_android_via_grid():
     )
 
     # Проверка установки приложения
-    assert driver.is_app_installed("ru.oneme.app")
+    assert driver.is_app_installed("com.saucelabs.mydemoapp.rn")
 
     # Завершаем сессию
     driver.quit()
