@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y openjdk-11-jdk unzip curl \
  && unzip sdk.zip -d ${ANDROID_HOME}/cmdline-tools \
  && mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest \
  && yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses \
- && ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \"platform-tools\" \"platforms;android-30\" \"emulator\" \"system-images;android-30;google_apis;x86_64\"
-
-USER node
-CMD [\"appium\", \"--base-path\", \"/wd/hub\"]
+ && ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \
+     "platform-tools" \
+     "platforms;android-30" \
+     "emulator" \
+     "system-images;android-30;google_apis;x86_64"
