@@ -2,19 +2,20 @@ version: '3.8'
 
 services:
   appium:
-    build:
-      context: ./docker/appium
-      dockerfile: Dockerfile
+    image: budtmo/docker-android-x86-11.0:latest
     container_name: appium
+    privileged: true
     ports:
       - "4723:4723"
+      - "5554:5554"
+      - "5555:5555"
     volumes:
       - ./apps:/apps
     environment:
-      - ANDROID_HOME=/opt/android-sdk
-      - PATH=$PATH:/opt/android-sdk/tools:/opt/android-sdk/platform-tools:/opt/android-sdk/emulator
+      - CONNECT_TIMEOUT=600
+      - ADB_INSTALL_TIMEOUT=600
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4723/wd/hub/status"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
