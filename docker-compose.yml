@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   appium:
-    build: ./docker
+    build: ./docker/appium
     container_name: appium
     ports:
       - "4723:4723"
