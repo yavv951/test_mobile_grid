@@ -3,7 +3,7 @@ version: '3.8'
 services:
   appium:
     build:
-      context: ./docker
+      context: ./docker/appium
       dockerfile: Dockerfile
     container_name: appium
     ports:
