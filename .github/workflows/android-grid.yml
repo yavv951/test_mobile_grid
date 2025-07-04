@@ -32,7 +32,7 @@ jobs:
           sleep 30
           until curl -s http://localhost:4723/wd/hub/status | grep -q '"ready":true'; do sleep 5; done
 
-      - name: Debug: Appium logs if failed
+      - name: Debug Appium logs if failed
         run: |
           container_id=$(docker ps -a --filter "name=appium" --format "{{.ID}}")
           echo "Appium container ID: $container_id"
