@@ -2,14 +2,14 @@ version: '3.8'
 
 services:
   android_emulator:
-    image: budtmo/docker-android-x86-11.0-google_apis
+    image: budtmo/docker-android:emulator_11.0
     container_name: android_emulator
     privileged: true
     ports:
-      - "4723:4723"
-      - "6080:6080"
-      - "5554:5554"
-      - "5555:5555"
+      - "4723:4723"  # Appium
+      - "6080:6080"  # noVNC
+      - "5554:5554"  # Emulator console
+      - "5555:5555"  # ADB
     environment:
       - DEVICE=Samsung Galaxy S10
       - APPIUM=true
