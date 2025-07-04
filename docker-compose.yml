@@ -2,14 +2,19 @@ version: '3.8'
 
 services:
   appium:
-    build: ./docker/appium
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
     container_name: appium
     ports:
       - "4723:4723"
     volumes:
       - ./apps:/apps
+    environment:
+      - ANDROID_HOME=/opt/android-sdk
+      - PATH=$PATH:/opt/android-sdk/tools:/opt/android-sdk/platform-tools:/opt/android-sdk/emulator
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4723/wd/hub/status"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5
