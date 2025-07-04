@@ -26,24 +26,6 @@ jobs:
       - name: Start emulator
         run: docker compose -f docker-compose.yml up -d
 
-      - name: Wait for Appium to be ready
-        run: |
-          echo "Waiting for Appium to be ready..."
-          for i in {1..30}; do
-            if curl -s http://localhost:4723/wd/hub/status | grep -q '"ready":true'; then
-              echo "✅ Appium is ready!"
-              exit 0
-            fi
-            sleep 10
-          done
-          echo "❌ Appium did not become ready in time"
-          exit 1
-
-      - name: Debug List APK files
-        run: |
-          container_id=$(docker ps -a --filter "name=android_emulator" --format "{{.ID}}")
-          docker exec "$container_id" ls -l /apps
-
       - name: Run tests
         run: pytest -v tests/ | tee pytest.log
         continue-on-error: true
