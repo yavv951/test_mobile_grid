@@ -1,10 +1,11 @@
-name: test-android
+name: test-android-grid
 
 on:
   push:
-    branches: [master]
+    branches: [ main ]
   pull_request:
-    branches: [master]
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   test-android:
@@ -23,20 +24,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Start Grid and Appium
-        run: docker compose up --build -d
+      - name: Build and Start Appium Grid
+        run: docker compose -f docker-compose.yml up --build -d
 
       - name: Wait for Appium to become healthy
         run: |
-          echo "⏳ Waiting for Appium to be ready..."
+          echo "Waiting for Appium to be ready..."
           sleep 30
           until curl -s http://localhost:4723/wd/hub/status | grep -q '"ready":true'; do sleep 5; done
-
-      - name: Debug Appium logs if failed
-        run: |
-          container_id=$(docker ps -a --filter "name=appium" --format "{{.ID}}")
-          echo "Appium container ID: $container_id"
-          docker logs "$container_id" || true
 
       - name: Check APK in container
         run: |
@@ -51,7 +46,6 @@ jobs:
         if: always()
         run: |
           docker logs $(docker ps -a --filter "name=appium" --format "{{.ID}}") > appium.log || true
-          docker logs $(docker ps -a --filter "name=selenium-hub" --format "{{.ID}}") > hub.log || true
 
       - name: Upload logs
         if: always()
