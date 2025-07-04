@@ -1,11 +1,10 @@
-name: test-android-grid
+name: test-android
 
 on:
   push:
     branches: [master]
   pull_request:
     branches: [master]
-  workflow_dispatch:
 
 jobs:
   test-android:
@@ -24,18 +23,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build and Start Appium Grid
-        run: docker compose -f docker-compose.yml up --build -d
+      - name: Start Grid and Android Emulator
+        run: docker compose -f docker-compose.yml up -d
 
-      - name: Wait for Appium to become healthy
+      - name: Wait for emulator & Appium
         run: |
-          echo "Waiting for Appium to be ready..."
-          sleep 30
-          until curl -s http://localhost:4723/wd/hub/status | grep -q '"ready":true'; do sleep 5; done
+          echo "Waiting for Appium..."
+          for i in {1..30}; do
+            if curl -s http://localhost:4723/wd/hub/status | grep -q '"ready":true'; then
+              echo "Appium is ready!"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Appium did not become ready in time"
+          exit 1
 
       - name: Check APK in container
         run: |
-          container_id=$(docker ps -a --filter "name=appium" --format "{{.ID}}")
+          container_id=$(docker ps -a --filter "name=android_emulator" --format "{{.ID}}")
           docker exec "$container_id" ls -l /apps
 
       - name: Run tests
@@ -45,7 +51,8 @@ jobs:
       - name: Collect container logs
         if: always()
         run: |
-          docker logs $(docker ps -a --filter "name=appium" --format "{{.ID}}") > appium.log || true
+          docker logs $(docker ps -a --filter "name=android_emulator" --format "{{.ID}}") > appium.log || true
+          docker logs $(docker ps -a --filter "name=selenium-hub" --format "{{.ID}}") > hub.log || true
 
       - name: Upload logs
         if: always()

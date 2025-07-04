@@ -1,20 +1,24 @@
 version: '3.8'
 
 services:
-  appium:
-    build:
-      context: ./docker/appium
-      dockerfile: Dockerfile
-    container_name: appium
+  android_emulator:
+    image: budtmo/docker-android-x86-11.0
+    container_name: android_emulator
+    privileged: true
     ports:
+      - "6080:6080"
       - "4723:4723"
+      - "5554:5554"
+      - "5555:5555"
+    environment:
+      - DEVICE=Samsung Galaxy S10
+      - APPIUM=true
+      - AUTO_RECORD=false
+      - VERBOSE=true
+    healthcheck:
+      test: curl --fail http://localhost:4723/wd/hub/status || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 15
     volumes:
       - ./apps:/apps
-    environment:
-      - ANDROID_HOME=/opt/android-sdk
-      - PATH=$PATH:/opt/android-sdk/tools:/opt/android-sdk/platform-tools:/opt/android-sdk/emulator
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4723/wd/hub/status"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
