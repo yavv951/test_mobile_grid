@@ -1,48 +1,61 @@
-name: Android Appium Grid Tests
+name: test-android
 
 on:
   push:
     branches: [master]
   pull_request:
+    branches: [master]
 
 jobs:
   test-android:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Start Grid and Appium
-        run: docker compose up --build -d --wait --wait-timeout 60
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Проверить apk в контейнере
+      - name: Start Grid and Appium
+        run: docker-compose up --build -d
+
+      - name: Wait for Appium to become healthy
+        run: |
+          echo "⏳ Waiting for Appium to be ready..."
+          sleep 30
+          until curl -s http://localhost:4723/wd/hub/status | grep -q '"ready":true'; do sleep 5; done
+
+      - name: Debug: Appium logs if failed
         run: |
           container_id=$(docker ps -a --filter "name=appium" --format "{{.ID}}")
-          echo "Appium container: $container_id"
+          echo "Appium container ID: $container_id"
+          docker logs "$container_id" || true
+
+      - name: Check APK in container
+        run: |
+          container_id=$(docker ps -a --filter "name=appium" --format "{{.ID}}")
           docker exec "$container_id" ls -l /apps
 
       - name: Run tests
-        run: |
-          pytest -v tests/ | tee pytest.log
+        run: pytest -v tests/ | tee pytest.log
         continue-on-error: true
 
       - name: Collect container logs
         if: always()
         run: |
-          docker logs selenium-hub > hub.log || true
-          docker logs appium > appium.log || true
+          docker logs $(docker ps -a --filter "name=appium" --format "{{.ID}}") > appium.log || true
+          docker logs $(docker ps -a --filter "name=selenium-hub" --format "{{.ID}}") > hub.log || true
 
-      - name: Upload artifacts
+      - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: logs
           path: pytest.log appium.log hub.log *.png

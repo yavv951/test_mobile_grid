@@ -1,29 +1,40 @@
-version: "3.8"
+version: '3.8'
+
 services:
   selenium-hub:
     image: selenium/hub:4.21.0
     container_name: selenium-hub
     ports:
       - "4444:4444"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   appium:
-    build:
-      context: ./docker/appium
+    build: ./docker
     container_name: appium
-    volumes:
-      - ./apps:/apps
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
     ports:
       - "4723:4723"
-    depends_on:
-      - selenium-hub
+    volumes:
+      - ./apps:/apps
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4723/wd/hub/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   node:
-    image: selenium/node-docker:4.21.0
-    container_name: node
+    image: selenium/node-docker:4.21.0-20240625
+    shm_size: 2g
     depends_on:
-      - selenium-hub
-      - appium
-    volumes:
-      - ./docker/node1.toml:/opt/selenium/config.toml
-    command: >
-      java -jar /opt/selenium/selenium-server.jar node --config /opt/selenium/config.toml
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
