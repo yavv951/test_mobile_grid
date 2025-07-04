@@ -39,7 +39,7 @@ jobs:
           echo "❌ Appium did not become ready in time"
           exit 1
 
-      - name: Debug: List APK files
+      - name: Debug List APK files
         run: |
           container_id=$(docker ps -a --filter "name=android_emulator" --format "{{.ID}}")
           docker exec "$container_id" ls -l /apps
