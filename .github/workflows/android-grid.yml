@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Start containers
+      - name: Start Grid and Appium
         run: docker compose up --build -d --wait --wait-timeout 60
 
       - name: Set up Python
@@ -23,8 +23,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Проверить доступность apk в контейнере
-        run: docker exec appium ls -l /apps
+      - name: Проверить apk в контейнере
+        run: |
+          container_id=$(docker ps -a --filter "name=appium" --format "{{.ID}}")
+          echo "Appium container: $container_id"
+          docker exec "$container_id" ls -l /apps
 
       - name: Run tests
         run: |
