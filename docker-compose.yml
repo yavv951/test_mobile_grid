@@ -1,10 +1,18 @@
 version: '3.8'
 
 services:
+  selenium-hub:
+    image: selenium/hub:4.21.0
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+
   android_emulator:
     image: budtmo/docker-android:emulator_11.0
     container_name: android_emulator
     privileged: true
+    depends_on:
+      - selenium-hub
     ports:
       - "4723:4723"  # Appium
       - "6080:6080"  # noVNC
@@ -13,9 +21,9 @@ services:
     environment:
       - DEVICE=Samsung Galaxy S10
       - APPIUM=true
-      - AUTO_RECORD=false
-      - APPIUM_ARGS=--base-path=/wd/hu
-      - VERBOSE=true
+      - CONNECT_TO_GRID=true
+      - SELENIUM_HOST=selenium-hub
+      - SELENIUM_PORT=4444
     volumes:
       - ./apps:/apps
     healthcheck:
