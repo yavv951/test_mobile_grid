@@ -14,6 +14,7 @@ services:
       - DEVICE=Samsung Galaxy S10
       - APPIUM=true
       - AUTO_RECORD=false
+      - APPIUM_ARGS=--base-path=/wd/hu
       - VERBOSE=true
     volumes:
       - ./apps:/apps
